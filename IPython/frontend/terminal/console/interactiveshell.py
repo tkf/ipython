@@ -28,6 +28,7 @@ from IPython.core.alias import AliasManager, AliasError
 from IPython.core import page
 from IPython.utils.warn import warn, error, fatal
 from IPython.utils import io
+from IPython.zmq.serialize import unserialize_object
 
 from IPython.frontend.terminal.interactiveshell import TerminalInteractiveShell
 from IPython.frontend.terminal.console.completer import ZMQCompleter
@@ -151,6 +152,15 @@ class ZMQTerminalInteractiveShell(TerminalInteractiveShell):
                 if msg_type == 'status' :
                     if sub_msg["content"]["execution_state"] == "busy" :
                         pass
+
+                elif msg_type == 'data_message':
+                    if 'pickled_matplotlib' in sub_msg['content']['keys']:
+                        # Unserializing buffers adds figures to
+                        # matplotlib stack, so there is no need to
+                        # bind the unserialized object.
+                        unserialize_object(sub_msg['buffers'])
+                        from matplotlib import pyplot
+                        pyplot.show()
 
                 elif msg_type == 'stream' :
                     if sub_msg["content"]["name"] == "stdout":
