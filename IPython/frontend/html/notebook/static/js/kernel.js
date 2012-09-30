@@ -24,6 +24,15 @@ var IPython = (function (IPython) {
         this.username = "username";
         this.session_id = utils.uuid();
         this._msg_callbacks = {};
+
+        if (typeof(WebSocket) !== 'undefined') {
+            this.WebSocket = WebSocket;
+        } else if (typeof(MozWebSocket) !== 'undefined') {
+            this.WebSocket = MozWebSocket;
+        } else {
+            alert('Your browser does not have WebSocket support, please try Chrome, Safari or Firefox ≥ 6. Firefox 4 and 5 are also supported by you have to enable WebSockets in about:config.');
+        };
+
     };
 
 
@@ -117,9 +126,11 @@ var IPython = (function (IPython) {
         var that = this;
         this.stop_channels();
         var ws_url = this.ws_url + this.kernel_url;
-        console.log("Starting SockJS:", ws_url);
-        this.shell_channel = new SockJS(ws_url + "/shell");
-        this.iopub_channel = new SockJS(ws_url + "/iopub");
+        var real_ws_url = "ws://" + ws_url.split("://")[1]
+        console.log("Got SockJS URL:", ws_url);
+        console.log("Starting Websocket:", real_ws_url);
+        this.shell_channel = new this.WebSocket(real_ws_url + "/shell/websocket");
+        this.iopub_channel = new this.WebSocket(real_ws_url + "/iopub/websocket");
         send_cookie = function(){
             this.send(document.cookie);
         };
