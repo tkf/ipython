@@ -126,7 +126,7 @@ var IPython = (function (IPython) {
         var that = this;
         this.stop_channels();
         var ws_url = this.ws_url + this.kernel_url;
-        var real_ws_url = "ws://" + ws_url.split("://")[1];
+        var real_ws_url = ws_url.replace('http', 'ws');
         console.log("Got SockJS URL:", ws_url);
         console.log("Starting Websocket:", real_ws_url);
         this.shell_channel = new this.WebSocket(real_ws_url + "/shell/websocket");
